@@ -37,8 +37,12 @@ source $clouds/$cloud
 
 vers_suffix=$(date +%y%m%d)
 released_uuid=$(glance_id "$name")
-testing_tenant_id=$(tenant_id "$testing_tenant")
-[ -z "$testing_tenant_id" ] && { _err "the configured Openstack user seems not to have the apropriate roles defined in keystone: unable to check testing tenant id"; exit 1; }
+if [ $testing_tenant ]; then
+    testing_tenant_id=$(tenant_id "$testing_tenant")
+    [ -z "$testing_tenant_id" ] && { _err "the configured Openstack user seems not to have the apropriate roles defined in keystone: unable to check testing tenant id"; exit 1; }
+fi
+
+
 
 # publish in the quarantine area
 if [ $opt_q = 0 ]
@@ -98,10 +102,13 @@ then
             | awk '/ id /{print $4}'
     )
     
-    _debug "provide access to testing tenant <$testing_tenant>"
-    q_uuid=$(glance_id ${name}.q)
-    glance member-create $q_uuid $testing_tenant_id
-    
+    if [ $testing_tenant ]; then 
+        _debug "provide access to testing tenant <$testing_tenant>"
+        q_uuid=$(glance_id ${name}.q)
+        glance member-create $q_uuid $testing_tenant_id
+    fi
+   
+ 
 # really publish image
 else
     
@@ -134,8 +141,11 @@ else
         glance image-update $q_uuid --is-public True <&-
     fi
 
-    _debug "remove testing tenant auth on cloud <$cloud>"
-    glance member-delete $q_uuid $testing_tenant_id
+    if [ $testing_tenant ]; then
+        _debug "remove testing tenant auth on cloud <$cloud>"
+        glance member-delete $q_uuid $testing_tenant_id
+    fi
+
     
     if glance image-update $q_uuid --name $name --is-protected ${is_protected:-True} <&-
     then

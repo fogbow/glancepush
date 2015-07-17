@@ -27,12 +27,12 @@ ssh_opts="-F/dev/null -oConnectTimeout=20 -ostricthostkeychecking=no -oUserKnown
 
 _log()
 {
-    logger -s -t glancepush -p user.notice "$*" &> /dev/null
+    logger -s -t glancepush -p user.notice "$*"
 }
 
 _debug()
 {
-    [ "$debug" = true ] && logger -s -t glancepush -p user.notice "$*" &> /dev/null
+    [ "$debug" = true ] && logger -s -t glancepush -p user.notice "$*"
 }
 
 _err()
