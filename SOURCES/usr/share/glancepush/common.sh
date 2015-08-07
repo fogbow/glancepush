@@ -377,6 +377,9 @@ update_done()
 {
     typeset image=$1
 
+    rm $(image_path "$image")
+    _log "<$image> removed of the /tmp"
+
     rm -f "$spooldir/$image"
 }
 
